@@ -732,7 +732,9 @@ if (
   cargarFicha(coincidenciasExactas[0].id_mascota);
 }
 
-  async function cargarFicha(idMascota) {
+}
+
+async function cargarFicha(idMascota) {
     const mascotaLocal = mascotasBase.find(m => String(m.id_mascota) === String(idMascota));
 
     if (mascotaLocal) {
