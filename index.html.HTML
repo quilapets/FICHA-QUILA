@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ficha QUILA | QuilaPets</title>
+
+  <style>
+    :root {
+      --verde-principal: #176b2c;
+      --verde-suave: #eef8f0;
+      --verde-borde: #cfe6d4;
+
+      --amarillo-principal: #f2dc5d;
+      --amarillo-suave: #fff8dc;
+      --amarillo-borde: #f2e2a4;
+
+      --lila-principal: #8b5fbf;
+      --lila-suave: #f4eefb;
+      --lila-borde: #dccbed;
+
+      --gris-oscuro: #424242;
+      --gris-texto: #374151;
+      --gris-fondo: #f4f6f4;
+      --gris-borde: #d8ded9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(
+        180deg,
+        #f7f8f6 0%,
+        var(--gris-fondo) 100%
+      );
+      color: var(--gris-texto);
+    }
+
+    .contenedor-principal {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .seccion {
+      border-radius: 18px;
+      border: 1px solid transparent;
+      overflow: hidden;
+      margin-bottom: 22px;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+    }
+
+    .encabezado-seccion {
+      padding: 15px 20px;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 0.4px;
+    }
+
+    .cuerpo-seccion {
+      padding: 20px;
+    }
+
+    .conocer {
+      background: var(--verde-suave);
+      border-color: var(--verde-borde);
+    }
+
+    .conocer .encabezado-seccion {
+      background: var(--verde-principal);
+      color: white;
+    }
+
+    .guiar {
+      background: var(--amarillo-suave);
+      border-color: var(--amarillo-borde);
+    }
+
+    .guiar .encabezado-seccion {
+      background: var(--amarillo-principal);
+      color: var(--gris-oscuro);
+    }
+
+    .acompanar {
+      background: var(--lila-suave);
+      border-color: var(--lila-borde);
+    }
+
+    .acompanar .encabezado-seccion {
+      background: var(--lila-principal);
+      color: white;
+    }
+
+    .grilla {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grilla-dos {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .campo-completo {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gris-texto);
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: white;
+      color: #1f2937;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--verde-principal);
+      box-shadow: 0 0 0 3px rgba(23, 107, 44, 0.14);
+    }
+
+    .campo-oculto {
+      display: none !important;
+    }
+
+    .boton-guardar {
+      width: 100%;
+      padding: 16px;
+      border: 0;
+      border-radius: 15px;
+      background: var(--verde-principal);
+      color: white;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(23, 107, 44, 0.2);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .boton-guardar:hover {
+      background: #125523;
+      transform: translateY(-1px);
+    }
+
+    .boton-guardar:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .mensaje-exito {
+      display: none;
+      padding: 40px 25px;
+      border: 1px solid var(--verde-borde);
+      border-radius: 18px;
+      background: white;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .mensaje-exito.visible {
+      display: block;
+    }
+
+    .mensaje-exito h2 {
+      margin: 0 0 8px;
+      color: var(--verde-principal);
+      font-size: 27px;
+    }
+
+    .mensaje-exito p {
+      margin: 0 0 20px;
+      color: #6b7280;
+    }
+
+    .boton-nueva-ficha {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 20px;
+      background: #e5f4e8;
+      color: var(--verde-principal);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .mensaje-error {
+      display: none;
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    .mensaje-error.visible {
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .grilla,
+      .grilla-dos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .contenedor-principal {
+        padding: 12px;
+      }
+
+      .grilla,
+      .grilla-dos {
+        grid-template-columns: 1fr;
+      }
+
+      .cuerpo-seccion {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="contenedor-principal">
+
+    <div id="mensajeError" class="mensaje-error"></div>
+
+    <form id="fichaQuila">
+
+      <!-- 1. CONOCER -->
+      <section class="seccion conocer">
+
+        <div class="encabezado-seccion">
+          1. CONOCER
+        </div>
+
+        <div class="cuerpo-seccion">
+
+          <div class="grilla">
+
+            <div>
+              <label for="nombre_tutor">Nombre y apellido del tutor</label>
+
+              <input
+                type="text"
+                id="nombre_tutor"
+                name="nombre_tutor"
+                required
+                autocomplete="name"
+                placeholder="Ej: Carolina Pérez"
+              >
+            </div>
+
+            <div>
+              <label for="whatsapp">WhatsApp</label>
+
+              <input
+                type="text"
+                id="whatsapp"
+                name="whatsapp"
+                required
+                maxlength="11"
+                pattern="[0-9]{11}"
+                placeholder="569XXXXXXXX"
+                autocomplete="tel"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+              >
+            </div>
+
+            <div>
+              <label for="sector">Sector</label>
+
+              <select id="sector" name="sector">
+                <option value="">Seleccionar...</option>
+
+                <option value="Jardín del Este / Barcelona / Emmanuel / Toledo / Barrio Universitario">
+                  Jardín del Este / Barcelona / Emmanuel / Toledo / Barrio Universitario
+                </option>
+
+                <option value="Quilamapu / Flores Millán / San Alberto Hurtado">
+                  Quilamapu / Flores Millán / San Alberto Hurtado
+                </option>
+
+                <option value="Colonia Bernardo O'Higgins / Camino a Cato">
+                  Colonia Bernardo O'Higgins / Camino a Cato
+                </option>
+
+                <option value="Camino del Agua / Las Coles / Camino a Coihueco">
+                  Camino del Agua / Las Coles / Camino a Coihueco
+                </option>
+
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="pet_nombre">Nombre de la mascota</label>
+
+              <input
+                type="text"
+                id="pet_nombre"
+                name="pet_nombre"
+                required
+                oninput="actualizarIdMascota()"
+              >
+            </div>
+
+            <div>
+              <label for="especie">Especie</label>
+
+              <select
+                id="especie"
+                name="especie"
+                required
+                onchange="actualizarEtapas(); actualizarIdMascota();"
+              >
+                <option value="">Seleccionar...</option>
+                <option value="Perro">Perro</option>
+                <option value="Gato">Gato</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="raza">Raza o tipo</label>
+
+              <input
+                type="text"
+                id="raza"
+                name="raza"
+                placeholder="Ej: Poodle, Mestizo, Conejo"
+                oninput="actualizarIdMascota()"
+              >
+            </div>
+
+            <div>
+              <label for="sexo">Sexo</label>
+
+              <select
+                id="sexo"
+                name="sexo"
+                onchange="actualizarIdMascota()"
+              >
+                <option value="">Seleccionar...</option>
+                <option value="Macho">Macho</option>
+                <option value="Hembra">Hembra</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="esterilizado">Esterilizado/a</label>
+
+              <select id="esterilizado" name="esterilizado">
+                <option value="">Seleccionar...</option>
+                <option value="Sí">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="etapa">Etapa de vida</label>
+
+              <select
+                id="etapa"
+                name="etapa"
+                required
+                onchange="mostrarCamposNutricionales()"
+              >
+                <option value="">Seleccionar especie primero...</option>
+              </select>
+            </div>
+
+            <div id="campoPeso">
+              <label for="weight">Peso actual en kg</label>
+
+              <input
+                type="number"
+                id="weight"
+                name="weight"
+                step="0.1"
+                min="0"
+                placeholder="Ej: 12"
+              >
+            </div>
+
+            <div id="campoMeses" class="campo-oculto">
+              <label for="edad_meses">Edad en meses</label>
+
+              <input
+                type="number"
+                id="edad_meses"
+                name="edad_meses"
+                step="1"
+                min="0"
+                placeholder="Ej: 5"
+              >
+            </div>
+
+            <div id="campoPesoAdulto" class="campo-oculto">
+              <label for="weight_adult">Peso adulto estimado en kg</label>
+
+              <input
+                type="number"
+                id="weight_adult"
+                name="weight_adult"
+                step="0.1"
+                min="0"
+                placeholder="Ej: 25"
+              >
+            </div>
+
+            <div id="campoAnios" class="campo-oculto">
+              <label for="anios_vida">Edad en años</label>
+
+              <input
+                type="number"
+                id="anios_vida"
+                name="anios_vida"
+                step="1"
+                min="0"
+                placeholder="Ej: 6"
+              >
+            </div>
+
+            <div class="campo-completo">
+              <label for="condicion_especial">
+                Condición o antecedente relevante
+              </label>
+
+              <input
+                type="text"
+                id="condicion_especial"
+                name="condicion_especial"
+                placeholder="Ej: alergia al pollo, digestión sensible, problema urinario, sobrepeso..."
+              >
+            </div>
+
+            <div>
+              <label for="alimento_actual">Alimento actual</label>
+
+              <input
+                type="text"
+                id="alimento_actual"
+                name="alimento_actual"
+                required
+                placeholder="Ej: Acana Adult Small Breed"
+              >
+            </div>
+
+            <div>
+              <label for="formato_kg">Formato del saco en kg</label>
+
+              <input
+                type="text"
+                id="formato_kg"
+                name="formato_kg"
+                required
+                placeholder="Ej: 2 / 6 / 12"
+                oninput="this.value=this.value.replace(/[^0-9,.]/g,'')"
+              >
+            </div>
+
+            <div>
+              <label for="tiempo_consumo">
+                ¿Desde cuándo consume este alimento?
+              </label>
+
+              <select id="tiempo_consumo" name="tiempo_consumo">
+                <option value="">Seleccionar...</option>
+                <option value="Primera vez">Primera vez</option>
+                <option value="Menos de 3 meses">Menos de 3 meses</option>
+                <option value="Más de 3 meses">Más de 3 meses</option>
+                <option value="Más de 1 año">Más de 1 año</option>
+                <option value="Desde cachorro">Desde cachorro</option>
+              </select>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. GUIAR -->
+      <section class="seccion guiar">
+
+        <div class="encabezado-seccion">
+          2. GUIAR
+        </div>
+
+        <div class="cuerpo-seccion">
+
+          <div class="grilla-dos">
+
+            <div>
+              <label for="motivo_visita">Motivo de la visita</label>
+
+              <select
+                id="motivo_visita"
+                name="motivo_visita"
+                required
+                onchange="mostrarOtroMotivoVisita()"
+              >
+                <option value="">Seleccionar...</option>
+
+                <option value="Compra mismo alimento">
+                  Compra el mismo alimento
+                </option>
+
+                <option value="Busca alternativa">
+                  Busca una alternativa
+                </option>
+
+                <option value="Busca recomendación">
+                  Busca una recomendación
+                </option>
+
+                <option value="Primera compra">
+                  Primera compra
+                </option>
+
+                <option value="Otro">
+                  Otro
+                </option>
+              </select>
+            </div>
+
+            <div id="campoOtroMotivoVisita" class="campo-oculto">
+              <label for="otro_motivo_visita">
+                Especificar motivo de la visita
+              </label>
+
+              <input
+                type="text"
+                id="otro_motivo_visita"
+                name="otro_motivo_visita"
+                placeholder="Ej: consulta por formato, sabor o disponibilidad..."
+              >
+            </div>
+
+            <div>
+              <label for="motivo_principal">Motivo principal</label>
+
+              <select
+                id="motivo_principal"
+                name="motivo_principal"
+                onchange="mostrarOtroMotivoPrincipal()"
+              >
+                <option value="">Seleccionar...</option>
+                <option value="Precio">Precio</option>
+                <option value="Digestión">Digestión</option>
+                <option value="Piel / pelaje">Piel / pelaje</option>
+
+                <option value="Recomendación veterinaria">
+                  Recomendación veterinaria
+                </option>
+
+                <option value="Mejor calidad">
+                  Mejor calidad
+                </option>
+
+                <option value="No encontró su marca">
+                  No encontró su marca
+                </option>
+
+                <option value="Mantener alimentación actual">
+                  Mantener alimentación actual
+                </option>
+
+                <option value="Otro">
+                  Otro
+                </option>
+              </select>
+            </div>
+
+            <div id="campoOtroMotivoPrincipal" class="campo-oculto">
+              <label for="otro_motivo_principal">
+                Especificar motivo principal
+              </label>
+
+              <input
+                type="text"
+                id="otro_motivo_principal"
+                name="otro_motivo_principal"
+                placeholder="Ej: quiere cambiar el sabor, busca un formato más pequeño..."
+              >
+            </div>
+
+            <div>
+              <label for="producto_recomendado">
+                Producto recomendado
+              </label>
+
+              <input
+                type="text"
+                id="producto_recomendado"
+                name="producto_recomendado"
+                placeholder="Ej: Biofresh Adulto Raza Pequeña"
+              >
+            </div>
+
+            <div>
+              <label for="razon_recomendacion">
+                Razón de la recomendación
+              </label>
+
+              <input
+                type="text"
+                id="razon_recomendacion"
+                name="razon_recomendacion"
+                placeholder="Ej: digestibilidad, proteínas, precio o etapa de vida"
+              >
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 3. ACOMPAÑAR -->
+      <section class="seccion acompanar">
+
+        <div class="encabezado-seccion">
+          3. ACOMPAÑAR
+        </div>
+
+        <div class="cuerpo-seccion">
+
+          <div class="grilla">
+
+            <div>
+              <label for="fecha_compra">Fecha de compra</label>
+
+              <input
+                type="date"
+                id="fecha_compra"
+                name="fecha_compra"
+              >
+            </div>
+
+            <div>
+              <label for="fecha_reposicion">
+                Fecha estimada de reposición
+              </label>
+
+              <input
+                type="date"
+                id="fecha_reposicion"
+                name="fecha_reposicion"
+              >
+            </div>
+
+            <div>
+              <label for="fecha_contacto">
+                Fecha de próximo contacto
+              </label>
+
+              <input
+                type="date"
+                id="fecha_contacto"
+                name="fecha_contacto"
+              >
+            </div>
+
+            <div>
+              <label for="perfil_cliente">
+                Perfil del cliente
+              </label>
+
+              <select id="perfil_cliente" name="perfil_cliente">
+                <option value="">Seleccionar...</option>
+
+                <option value="Compra por calidad">
+                  Compra por calidad
+                </option>
+
+                <option value="Compra por precio">
+                  Compra por precio
+                </option>
+
+                <option value="Fiel a marca">
+                  Fiel a una marca
+                </option>
+
+                <option value="Abierto a alternativas">
+                  Abierto a alternativas
+                </option>
+
+                <option value="Tiene varias mascotas">
+                  Tiene varias mascotas
+                </option>
+
+                <option value="Cliente parcela">
+                  Cliente de parcela
+                </option>
+              </select>
+            </div>
+
+            <div class="campo-completo">
+              <label for="observaciones">Observaciones</label>
+
+              <textarea
+                id="observaciones"
+                name="observaciones"
+                placeholder="Ej: tiene cuatro perros, compra a fin de mes, vive en parcela, busca alimento sin pollo..."
+              ></textarea>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <input
+        type="hidden"
+        id="id_mascota"
+        name="id_mascota"
+      >
+
+      <button
+        type="submit"
+        id="botonGuardar"
+        class="boton-guardar"
+      >
+        Guardar Ficha QUILA
+      </button>
+
+    </form>
+
+    <section id="mensajeExito" class="mensaje-exito">
+
+      <h2>Ficha guardada correctamente</h2>
+
+      <p>
+        La mascota quedó registrada en QuilaPets.
+      </p>
+
+      <button
+        type="button"
+        class="boton-nueva-ficha"
+        onclick="crearNuevaFicha()"
+      >
+        Crear nueva ficha
+      </button>
+
+    </section>
+
+  </main>
+
+  <script>
+    const WEBHOOK_URL =
+      "https://script.google.com/macros/s/AKfycbzMOOpp2jUyXX1oBs_vfCCIvqkEGTT-I1FHfTdCt7crJyHQhN2dT5nDbfQ-2Wzvix2Z-A/exec";
+
+    const formulario = document.getElementById("fichaQuila");
+    const botonGuardar = document.getElementById("botonGuardar");
+    const mensajeExito = document.getElementById("mensajeExito");
+    const mensajeError = document.getElementById("mensajeError");
+
+    document.getElementById("fecha_compra").valueAsDate = new Date();
+
+    function actualizarIdMascota() {
+      const nombre =
+        document.getElementById("pet_nombre").value.trim() || "Mascota";
+
+      const sexo =
+        document.getElementById("sexo").value || "Sin sexo";
+
+      const especie =
+        document.getElementById("especie").value || "Sin especie";
+
+      const raza =
+        document.getElementById("raza").value.trim() || especie;
+
+      document.getElementById("id_mascota").value =
+        `${nombre} - ${sexo} - ${raza}`;
+    }
+
+    function actualizarEtapas() {
+      const especie = document.getElementById("especie").value;
+      const etapa = document.getElementById("etapa");
+
+      etapa.innerHTML =
+        '<option value="">Seleccionar...</option>';
+
+      if (especie === "Perro") {
+        etapa.innerHTML += `
+          <option value="Cachorro">Cachorro</option>
+          <option value="Adulto">Adulto</option>
+          <option value="Senior">Senior</option>
+        `;
+      }
+
+      if (especie === "Gato") {
+        etapa.innerHTML += `
+          <option value="Gatito">Gatito</option>
+          <option value="Adulto">Adulto</option>
+          <option value="Senior">Senior</option>
+        `;
+      }
+
+      if (especie === "Otro") {
+        etapa.innerHTML += `
+          <option value="Cría">Cría</option>
+          <option value="Adulto">Adulto</option>
+        `;
+      }
+
+      mostrarCamposNutricionales();
+    }
+
+    function mostrarCamposNutricionales() {
+      const especie =
+        document.getElementById("especie").value;
+
+      const etapa =
+        document.getElementById("etapa").value;
+
+      const campoMeses =
+        document.getElementById("campoMeses");
+
+      const campoPesoAdulto =
+        document.getElementById("campoPesoAdulto");
+
+      const campoAnios =
+        document.getElementById("campoAnios");
+
+      const edadMeses =
+        document.getElementById("edad_meses");
+
+      const pesoAdulto =
+        document.getElementById("weight_adult");
+
+      const aniosVida =
+        document.getElementById("anios_vida");
+
+      campoMeses.classList.add("campo-oculto");
+      campoPesoAdulto.classList.add("campo-oculto");
+      campoAnios.classList.add("campo-oculto");
+
+      edadMeses.required = false;
+      pesoAdulto.required = false;
+      aniosVida.required = false;
+
+      if (especie === "Perro" && etapa === "Cachorro") {
+        campoMeses.classList.remove("campo-oculto");
+        campoPesoAdulto.classList.remove("campo-oculto");
+
+        edadMeses.required = true;
+        pesoAdulto.required = true;
+      }
+
+      if (especie === "Gato" && etapa === "Gatito") {
+        campoMeses.classList.remove("campo-oculto");
+        edadMeses.required = true;
+      }
+
+      if (
+        (especie === "Perro" || especie === "Gato") &&
+        (etapa === "Adulto" || etapa === "Senior")
+      ) {
+        campoAnios.classList.remove("campo-oculto");
+        aniosVida.required = true;
+      }
+
+      if (especie === "Otro" && etapa === "Cría") {
+        campoMeses.classList.remove("campo-oculto");
+      }
+
+      if (especie === "Otro" && etapa === "Adulto") {
+        campoAnios.classList.remove("campo-oculto");
+      }
+    }
+
+    function mostrarOtroMotivoVisita() {
+      const motivo =
+        document.getElementById("motivo_visita").value;
+
+      const campo =
+        document.getElementById("campoOtroMotivoVisita");
+
+      const input =
+        document.getElementById("otro_motivo_visita");
+
+      if (motivo === "Otro") {
+        campo.classList.remove("campo-oculto");
+        input.required = true;
+      } else {
+        campo.classList.add("campo-oculto");
+        input.required = false;
+        input.value = "";
+      }
+    }
+
+    function mostrarOtroMotivoPrincipal() {
+      const motivo =
+        document.getElementById("motivo_principal").value;
+
+      const campo =
+        document.getElementById("campoOtroMotivoPrincipal");
+
+      const input =
+        document.getElementById("otro_motivo_principal");
+
+      if (motivo === "Otro") {
+        campo.classList.remove("campo-oculto");
+        input.required = true;
+      } else {
+        campo.classList.add("campo-oculto");
+        input.required = false;
+        input.value = "";
+      }
+    }
+
+    function mostrarError(texto) {
+      mensajeError.textContent = texto;
+      mensajeError.classList.add("visible");
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    function ocultarError() {
+      mensajeError.textContent = "";
+      mensajeError.classList.remove("visible");
+    }
+
+    function crearNuevaFicha() {
+      formulario.reset();
+
+      document.getElementById("fecha_compra").valueAsDate =
+        new Date();
+
+      document.getElementById("etapa").innerHTML =
+        '<option value="">Seleccionar especie primero...</option>';
+
+      document.getElementById("campoMeses")
+        .classList.add("campo-oculto");
+
+      document.getElementById("campoPesoAdulto")
+        .classList.add("campo-oculto");
+
+      document.getElementById("campoAnios")
+        .classList.add("campo-oculto");
+
+      document.getElementById("campoOtroMotivoVisita")
+        .classList.add("campo-oculto");
+
+      document.getElementById("campoOtroMotivoPrincipal")
+        .classList.add("campo-oculto");
+
+      formulario.style.display = "block";
+      mensajeExito.classList.remove("visible");
+
+      ocultarError();
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    formulario.addEventListener("submit", async function (evento) {
+      evento.preventDefault();
+
+      ocultarError();
+      actualizarIdMascota();
+
+      const whatsapp =
+        document.getElementById("whatsapp").value.trim();
+
+      if (!/^[0-9]{11}$/.test(whatsapp)) {
+        mostrarError(
+          "El número de WhatsApp debe tener exactamente 11 dígitos."
+        );
+        return;
+      }
+
+      const datosFormulario =
+        new FormData(formulario);
+
+      const datos =
+        Object.fromEntries(datosFormulario.entries());
+
+      botonGuardar.disabled = true;
+      botonGuardar.textContent = "Guardando ficha...";
+
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(datos)
+        });
+
+        formulario.style.display = "none";
+        mensajeExito.classList.add("visible");
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+      } catch (error) {
+        console.error(error);
+
+        mostrarError(
+          "No fue posible guardar la ficha. Revisa tu conexión e inténtalo nuevamente."
+        );
+
+      } finally {
+        botonGuardar.disabled = false;
+        botonGuardar.textContent =
+          "Guardar Ficha QUILA";
+      }
+    });
+  </script>
+
+</body>
+</html>
