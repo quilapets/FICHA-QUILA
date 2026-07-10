@@ -19,9 +19,7 @@
       --rojo: #991b1b;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -34,10 +32,6 @@
       max-width: 1180px;
       margin: 0 auto;
       padding: 20px;
-    }
-
-    h1, h2, h3 {
-      margin-top: 0;
     }
 
     .tabs {
@@ -90,7 +84,7 @@
     .titulo-seccion {
       font-size: 20px;
       font-weight: 900;
-      margin-bottom: 15px;
+      margin: 0 0 15px;
     }
 
     .grilla {
@@ -105,9 +99,7 @@
       gap: 14px;
     }
 
-    .campo-completo {
-      grid-column: 1 / -1;
-    }
+    .campo-completo { grid-column: 1 / -1; }
 
     label {
       display: block;
@@ -138,10 +130,6 @@
       box-shadow: 0 0 0 3px rgba(23,107,44,.14);
     }
 
-    button {
-      font-family: inherit;
-    }
-
     .btn-principal {
       background: var(--verde);
       color: white;
@@ -154,14 +142,9 @@
       font-size: 16px;
     }
 
-    .btn-secundario {
-      background: #e5f4e8;
-      color: var(--verde);
-      border: 0;
-      border-radius: 12px;
-      padding: 11px 15px;
-      font-weight: 800;
-      cursor: pointer;
+    .btn-principal:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
     }
 
     .resultado {
@@ -215,6 +198,7 @@
     .dato strong {
       font-size: 14px;
       color: #111827;
+      word-break: break-word;
     }
 
     .historial-item {
@@ -225,13 +209,9 @@
       margin-bottom: 10px;
     }
 
-    .historial-item strong {
-      color: var(--lila);
-    }
+    .historial-item strong { color: var(--lila); }
 
-    .oculto {
-      display: none !important;
-    }
+    .oculto { display: none !important; }
 
     .mensaje {
       padding: 12px;
@@ -250,6 +230,15 @@
       color: #166534;
     }
 
+    .estado-carga {
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 14px;
+      color: #6b7280;
+      font-weight: 700;
+    }
+
     @media (max-width: 900px) {
       .grilla, .grilla-dos, .ficha-resumen {
         grid-template-columns: repeat(2, minmax(0,1fr));
@@ -257,9 +246,7 @@
     }
 
     @media (max-width: 640px) {
-      main {
-        padding: 12px;
-      }
+      main { padding: 12px; }
 
       .grilla, .grilla-dos, .ficha-resumen {
         grid-template-columns: 1fr;
@@ -289,12 +276,11 @@
         id="busqueda"
         type="text"
         placeholder="Ej: Filipa, Carolina, 569..., Bravery"
-        oninput="buscarConRetraso()"
+        oninput="buscarLocal()"
+        disabled
       >
 
-      <div class="mini">
-        Escribe al menos 2 letras o números.
-      </div>
+      <div id="estadoBase" class="mini">Cargando base de mascotas...</div>
     </div>
 
     <div id="resultados"></div>
@@ -308,7 +294,9 @@
 
       <div class="card card-lila">
         <h2 class="titulo-seccion">Historial</h2>
-        <div id="historialMascota"></div>
+        <div id="historialMascota">
+          <div class="estado-carga">Cargando historial...</div>
+        </div>
       </div>
 
       <div class="card card-amarilla">
@@ -413,7 +401,7 @@
               <textarea name="observaciones" placeholder="Ej: quedó en probar alternativa la próxima compra, aún tiene alimento para transición..."></textarea>
             </div>
 
-            <div>
+            <div class="campo-completo">
               <label>
                 <input type="checkbox" name="actualizar_alimento_habitual" value="true">
                 Actualizar alimento habitual con este producto
@@ -423,7 +411,14 @@
           </div>
 
           <br>
-          <button type="submit" class="btn-principal">Guardar nueva atención</button>
+
+          <button type="submit" id="btnGuardarAtencion" class="btn-principal">
+            Guardar nueva atención
+          </button>
+
+          <div id="confirmacionAtencion" class="mensaje mensaje-ok oculto" style="margin-top:14px;">
+            ✅ Atención guardada correctamente
+          </div>
 
         </form>
       </div>
@@ -548,7 +543,14 @@
         </div>
 
         <br>
-        <button type="submit" class="btn-principal">Crear mascota</button>
+
+        <button type="submit" id="btnCrearMascota" class="btn-principal">
+          Crear mascota
+        </button>
+
+        <div id="confirmacionMascota" class="mensaje mensaje-ok oculto" style="margin-top:14px;">
+          ✅ Mascota creada correctamente
+        </div>
 
       </form>
     </div>
@@ -560,10 +562,21 @@
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbx-AN3EhrJm8-loizR0UkpT-Ue7uYjfQ-NHcFtR7nbPSskIkuOmSDqV2gZ-gcQuYpXpag/exec";
 
-  let timerBusqueda = null;
+  let mascotasBase = [];
   let mascotaActual = null;
+  let ultimaAutoApertura = "";
 
   document.getElementById("fecha_compra").valueAsDate = new Date();
+
+  window.addEventListener("load", cargarBaseMascotas);
+
+  function normalizar(texto) {
+    return String(texto || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
 
   function mostrarMensaje(texto, tipo = "ok") {
     const div = document.getElementById("mensajeGlobal");
@@ -580,11 +593,6 @@
 
     if (vista === "buscar") botones[0].classList.add("activo");
     if (vista === "nueva") botones[1].classList.add("activo");
-  }
-
-  function buscarConRetraso() {
-    clearTimeout(timerBusqueda);
-    timerBusqueda = setTimeout(buscarMascotas, 350);
   }
 
   function jsonp(url) {
@@ -605,8 +613,35 @@
     });
   }
 
-  async function buscarMascotas() {
-    const q = document.getElementById("busqueda").value.trim();
+  async function cargarBaseMascotas() {
+    const input = document.getElementById("busqueda");
+    const estado = document.getElementById("estadoBase");
+
+    input.disabled = true;
+    estado.textContent = "Cargando base de mascotas...";
+
+    try {
+      const data = await jsonp(`${API_URL}?action=listarMascotas`);
+
+      if (!data.ok) {
+        estado.textContent = "No fue posible cargar la base de mascotas.";
+        mostrarMensaje(data.error || "Error cargando mascotas", "error");
+        return;
+      }
+
+      mascotasBase = data.resultados || [];
+      input.disabled = false;
+      estado.textContent = `Base cargada: ${mascotasBase.length} mascotas.`;
+
+    } catch (error) {
+      console.error(error);
+      estado.textContent = "No fue posible cargar la base. Revisa conexión.";
+      mostrarMensaje("No fue posible cargar la base de mascotas.", "error");
+    }
+  }
+
+  function buscarLocal() {
+    const q = normalizar(document.getElementById("busqueda").value);
     const contenedor = document.getElementById("resultados");
     const panelFicha = document.getElementById("panelFicha");
 
@@ -614,46 +649,97 @@
 
     if (q.length < 2) {
       contenedor.innerHTML = "";
+      ultimaAutoApertura = "";
       return;
     }
 
-    contenedor.innerHTML = `<div class="card">Buscando...</div>`;
+    const resultados = mascotasBase
+      .map(m => {
+        const nombreMascota = normalizar(m.nombre_mascota);
+        const nombreTutor = normalizar(m.nombre_tutor);
+        const whatsapp = normalizar(m.whatsapp);
 
-    try {
-      const data = await jsonp(`${API_URL}?action=buscarMascotas&q=${encodeURIComponent(q)}`);
+        const textoPrincipal = normalizar([
+          m.nombre_mascota,
+          m.nombre_tutor,
+          m.whatsapp
+        ].join(" "));
 
-      if (!data.ok) {
-        contenedor.innerHTML = `<div class="card">Error: ${data.error}</div>`;
-        return;
-      }
+        const textoSecundario = normalizar([
+          m.id_mascota,
+          m.raza,
+          m.alimento_habitual,
+          m.sector
+        ].join(" "));
 
-      if (data.resultados.length === 0) {
-        contenedor.innerHTML = `<div class="card">No se encontraron resultados.</div>`;
-        return;
-      }
+        const coincideExactoMascota = nombreMascota === q;
+        const coincideInicioMascota = nombreMascota.startsWith(q);
+        const coincideTutor = nombreTutor.includes(q);
+        const coincideWhatsapp = whatsapp.includes(q);
+        const coincidePrincipal = textoPrincipal.includes(q);
+        const coincideSecundario = textoSecundario.includes(q);
 
-      contenedor.innerHTML = data.resultados.map(m => `
-        <div class="resultado" onclick="cargarFicha('${escapeHtml(m.id_mascota)}')">
-          <strong>${escapeHtml(m.nombre_mascota || "Sin nombre")}</strong>
-          <div class="mini">
-            Tutor: ${escapeHtml(m.nombre_tutor || "-")} · 
-            ${escapeHtml(m.especie || "-")} · 
-            ${escapeHtml(m.raza || "-")}
-          </div>
-          <div class="mini">
-            Alimento habitual: ${escapeHtml(m.alimento_habitual || "-")} 
-            ${m.formato_kg ? "· " + escapeHtml(m.formato_kg) + " kg" : ""}
-          </div>
+        if (!(coincidePrincipal || coincideSecundario)) return null;
+
+        return {
+          ...m,
+          prioridad:
+            coincideExactoMascota ? 1 :
+            coincideInicioMascota ? 2 :
+            coincideTutor ? 3 :
+            coincideWhatsapp ? 3 :
+            coincidePrincipal ? 4 :
+            5,
+          exacta: coincideExactoMascota
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.prioridad - b.prioridad)
+      .slice(0, 20);
+
+    if (!resultados.length) {
+      contenedor.innerHTML = `<div class="card">No se encontraron resultados.</div>`;
+      return;
+    }
+
+    contenedor.innerHTML = resultados.map(m => `
+      <div class="resultado" onclick="cargarFicha('${escapeHtml(m.id_mascota)}')">
+        <strong>${escapeHtml(m.nombre_mascota || "Sin nombre")}</strong>
+        <div class="mini">
+          Tutor: ${escapeHtml(m.nombre_tutor || "-")} · 
+          ${escapeHtml(m.especie || "-")} · 
+          ${escapeHtml(m.raza || "-")}
         </div>
-      `).join("");
+        <div class="mini">
+          Alimento habitual: ${escapeHtml(m.alimento_habitual || "-")} 
+          ${m.formato_kg ? "· " + escapeHtml(m.formato_kg) + " kg" : ""}
+        </div>
+      </div>
+    `).join("");
 
-    } catch (error) {
-      console.error(error);
-      contenedor.innerHTML = `<div class="card">No fue posible buscar. Revisa la conexión.</div>`;
+    const coincidenciasExactas = resultados.filter(r => r.exacta);
+
+    if (
+      coincidenciasExactas.length === 1 &&
+      ultimaAutoApertura !== coincidenciasExactas[0].id_mascota
+    ) {
+      ultimaAutoApertura = coincidenciasExactas[0].id_mascota;
+      cargarFicha(coincidenciasExactas[0].id_mascota);
     }
   }
 
   async function cargarFicha(idMascota) {
+    const mascotaLocal = mascotasBase.find(m => String(m.id_mascota) === String(idMascota));
+
+    if (mascotaLocal) {
+      mascotaActual = mascotaLocal;
+      mostrarResumenDesdeLocal(mascotaLocal);
+      prepararFormularioAtencionDesdeLocal(mascotaLocal);
+      document.getElementById("historialMascota").innerHTML =
+        `<div class="estado-carga">Cargando historial...</div>`;
+      document.getElementById("panelFicha").classList.remove("oculto");
+    }
+
     try {
       const data = await jsonp(`${API_URL}?action=obtenerFicha&id=${encodeURIComponent(idMascota)}`);
 
@@ -677,8 +763,28 @@
 
     } catch (error) {
       console.error(error);
-      mostrarMensaje("No fue posible cargar la ficha.", "error");
+      mostrarMensaje("No fue posible cargar el historial.", "error");
     }
+  }
+
+  function mostrarResumenDesdeLocal(m) {
+    const contenedor = document.getElementById("resumenMascota");
+
+    contenedor.innerHTML = `
+      ${dato("Mascota", m.nombre_mascota)}
+      ${dato("Tutor", m.nombre_tutor)}
+      ${dato("WhatsApp", m.whatsapp)}
+      ${dato("Sector", m.sector)}
+      ${dato("Especie", m.especie)}
+      ${dato("Raza", m.raza)}
+      ${dato("Sexo", m.sexo)}
+      ${dato("Esterilizado", m.esterilizado)}
+      ${dato("Etapa", m.etapa)}
+      ${dato("Peso", m.peso_actual_kg ? m.peso_actual_kg + " kg" : "")}
+      ${dato("Condición", m.condicion)}
+      ${dato("Alimento habitual", `${m.alimento_habitual || ""} ${m.formato_kg ? "· " + m.formato_kg + " kg" : ""}`)}
+      ${dato("Observación base", m.observacion_base)}
+    `;
   }
 
   function mostrarResumen(m) {
@@ -731,8 +837,24 @@
     `).join("");
   }
 
+  function prepararFormularioAtencionDesdeLocal(m) {
+    document.getElementById("formAtencion").reset();
+    document.getElementById("confirmacionAtencion").classList.add("oculto");
+
+    document.getElementById("fecha_compra").valueAsDate = new Date();
+
+    document.getElementById("atencion_id_mascota").value = m.id_mascota || "";
+    document.getElementById("atencion_nombre_mascota").value = m.nombre_mascota || "";
+    document.getElementById("atencion_nombre_tutor").value = m.nombre_tutor || "";
+    document.getElementById("atencion_whatsapp").value = m.whatsapp || "";
+
+    document.getElementById("campo_otro_motivo_visita").classList.add("oculto");
+    document.getElementById("campo_otro_motivo_principal").classList.add("oculto");
+  }
+
   function prepararFormularioAtencion(m) {
     document.getElementById("formAtencion").reset();
+    document.getElementById("confirmacionAtencion").classList.add("oculto");
 
     document.getElementById("fecha_compra").valueAsDate = new Date();
 
@@ -763,6 +885,13 @@
   document.getElementById("formAtencion").addEventListener("submit", async function(e) {
     e.preventDefault();
 
+    const btn = document.getElementById("btnGuardarAtencion");
+    const confirmacion = document.getElementById("confirmacionAtencion");
+
+    confirmacion.classList.add("oculto");
+    btn.disabled = true;
+    btn.textContent = "Guardando...";
+
     const formData = new FormData(this);
     const datos = Object.fromEntries(formData.entries());
 
@@ -772,26 +901,36 @@
       await fetch(API_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
       });
 
+      confirmacion.classList.remove("oculto");
       mostrarMensaje("Atención guardada correctamente.");
 
       if (datos.id_mascota) {
-        setTimeout(() => cargarFicha(datos.id_mascota), 800);
+        setTimeout(() => cargarFicha(datos.id_mascota), 1200);
       }
 
     } catch (error) {
       console.error(error);
       mostrarMensaje("No fue posible guardar la atención.", "error");
+
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Guardar nueva atención";
     }
   });
 
   document.getElementById("formNuevaMascota").addEventListener("submit", async function(e) {
     e.preventDefault();
+
+    const btn = document.getElementById("btnCrearMascota");
+    const confirmacion = document.getElementById("confirmacionMascota");
+
+    confirmacion.classList.add("oculto");
+    btn.disabled = true;
+    btn.textContent = "Creando mascota...";
 
     const formData = new FormData(this);
     const datos = Object.fromEntries(formData.entries());
@@ -802,19 +941,27 @@
       await fetch(API_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(datos)
       });
 
+      confirmacion.classList.remove("oculto");
       mostrarMensaje("Mascota creada correctamente.");
+
       this.reset();
-      mostrarVista("buscar");
+
+      setTimeout(async () => {
+        await cargarBaseMascotas();
+        mostrarVista("buscar");
+      }, 1200);
 
     } catch (error) {
       console.error(error);
       mostrarMensaje("No fue posible crear la mascota.", "error");
+
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Crear mascota";
     }
   });
 
