@@ -702,31 +702,35 @@
       return;
     }
 
-    contenedor.innerHTML = resultados.map(m => `
-      <div class="resultado" onclick="cargarFicha('${escapeHtml(m.id_mascota)}')">
-        <strong>${escapeHtml(m.nombre_mascota || "Sin nombre")}</strong>
-        <div class="mini">
-          Tutor: ${escapeHtml(m.nombre_tutor || "-")} · 
-          ${escapeHtml(m.especie || "-")} · 
-          ${escapeHtml(m.raza || "-")}
-        </div>
-        <div class="mini">
-          Alimento habitual: ${escapeHtml(m.alimento_habitual || "-")} 
-          ${m.formato_kg ? "· " + escapeHtml(m.formato_kg) + " kg" : ""}
-        </div>
-      </div>
-    `).join("");
+const coincidenciasExactas = resultados.filter(r => r.exacta);
 
-    const coincidenciasExactas = resultados.filter(r => r.exacta);
+const resultadosVisibles =
+  coincidenciasExactas.length === 1
+    ? coincidenciasExactas
+    : resultados;
 
-    if (
-      coincidenciasExactas.length === 1 &&
-      ultimaAutoApertura !== coincidenciasExactas[0].id_mascota
-    ) {
-      ultimaAutoApertura = coincidenciasExactas[0].id_mascota;
-      cargarFicha(coincidenciasExactas[0].id_mascota);
-    }
-  }
+contenedor.innerHTML = resultadosVisibles.map(m => `
+  <div class="resultado" onclick="cargarFicha('${escapeHtml(m.id_mascota)}')">
+    <strong>${escapeHtml(m.nombre_mascota || "Sin nombre")}</strong>
+    <div class="mini">
+      Tutor: ${escapeHtml(m.nombre_tutor || "-")} · 
+      ${escapeHtml(m.especie || "-")} · 
+      ${escapeHtml(m.raza || "-")}
+    </div>
+    <div class="mini">
+      Alimento habitual: ${escapeHtml(m.alimento_habitual || "-")} 
+      ${m.formato_kg ? "· " + escapeHtml(m.formato_kg) + " kg" : ""}
+    </div>
+  </div>
+`).join("");
+
+if (
+  coincidenciasExactas.length === 1 &&
+  ultimaAutoApertura !== coincidenciasExactas[0].id_mascota
+) {
+  ultimaAutoApertura = coincidenciasExactas[0].id_mascota;
+  cargarFicha(coincidenciasExactas[0].id_mascota);
+}
 
   async function cargarFicha(idMascota) {
     const mascotaLocal = mascotasBase.find(m => String(m.id_mascota) === String(idMascota));
