@@ -211,6 +211,21 @@
 
     .historial-item strong { color: var(--lila); }
 
+    .bloque-cambio-alimento {
+      margin-top: 10px;
+      margin-bottom: 10px;
+      padding: 12px;
+      background: #fff8dc;
+      border: 1px solid #f2e2a4;
+      border-radius: 12px;
+    }
+
+    .bloque-cambio-alimento-titulo {
+      font-weight: 900;
+      color: #92400e;
+      margin-bottom: 6px;
+    }
+
     .oculto { display: none !important; }
 
     .mensaje {
@@ -404,7 +419,7 @@
             <div class="campo-completo">
               <label>
                 <input type="checkbox" name="actualizar_alimento_habitual" value="true">
-                Actualizar alimento habitual con este producto
+                Actualizar alimento habitual y registrar cambio
               </label>
             </div>
 
@@ -702,39 +717,38 @@
       return;
     }
 
-const coincidenciasExactas = resultados.filter(r => r.exacta);
+    const coincidenciasExactas = resultados.filter(r => r.exacta);
 
-const resultadosVisibles =
-  coincidenciasExactas.length === 1
-    ? coincidenciasExactas
-    : resultados;
+    const resultadosVisibles =
+      coincidenciasExactas.length === 1
+        ? coincidenciasExactas
+        : resultados;
 
-contenedor.innerHTML = resultadosVisibles.map(m => `
-  <div class="resultado" onclick="cargarFicha('${escapeHtml(m.id_mascota)}')">
-    <strong>${escapeHtml(m.nombre_mascota || "Sin nombre")}</strong>
-    <div class="mini">
-      Tutor: ${escapeHtml(m.nombre_tutor || "-")} · 
-      ${escapeHtml(m.especie || "-")} · 
-      ${escapeHtml(m.raza || "-")}
-    </div>
-    <div class="mini">
-      Alimento habitual: ${escapeHtml(m.alimento_habitual || "-")} 
-      ${m.formato_kg ? "· " + escapeHtml(m.formato_kg) + " kg" : ""}
-    </div>
-  </div>
-`).join("");
+    contenedor.innerHTML = resultadosVisibles.map(m => `
+      <div class="resultado" onclick="cargarFicha('${escapeHtml(m.id_mascota)}')">
+        <strong>${escapeHtml(m.nombre_mascota || "Sin nombre")}</strong>
+        <div class="mini">
+          Tutor: ${escapeHtml(m.nombre_tutor || "-")} · 
+          ${escapeHtml(m.especie || "-")} · 
+          ${escapeHtml(m.raza || "-")}
+        </div>
+        <div class="mini">
+          Alimento habitual: ${escapeHtml(m.alimento_habitual || "-")} 
+          ${m.formato_kg ? "· " + escapeHtml(m.formato_kg) + " kg" : ""}
+        </div>
+      </div>
+    `).join("");
 
-if (
-  coincidenciasExactas.length === 1 &&
-  ultimaAutoApertura !== coincidenciasExactas[0].id_mascota
-) {
-  ultimaAutoApertura = coincidenciasExactas[0].id_mascota;
-  cargarFicha(coincidenciasExactas[0].id_mascota);
-}
+    if (
+      coincidenciasExactas.length === 1 &&
+      ultimaAutoApertura !== coincidenciasExactas[0].id_mascota
+    ) {
+      ultimaAutoApertura = coincidenciasExactas[0].id_mascota;
+      cargarFicha(coincidenciasExactas[0].id_mascota);
+    }
+  }
 
-}
-
-async function cargarFicha(idMascota) {
+  async function cargarFicha(idMascota) {
     const mascotaLocal = mascotasBase.find(m => String(m.id_mascota) === String(idMascota));
 
     if (mascotaLocal) {
@@ -830,17 +844,68 @@ async function cargarFicha(idMascota) {
       return;
     }
 
-    contenedor.innerHTML = historial.slice(0, 10).map(h => `
-      <div class="historial-item">
-        <strong>${formatearFecha(h["FECHA REGISTRO"])}</strong>
-        <div class="mini">Tipo: ${escapeHtml(h["TIPO EVENTO"] || "-")}</div>
-        <div class="mini">Motivo: ${escapeHtml(h["MOTIVO VISITA"] || "-")} / ${escapeHtml(h["MOTIVO PRINCIPAL"] || "-")}</div>
-        <div class="mini">Producto: ${escapeHtml(h["PRODUCTO RECOMENDADO"] || "-")}</div>
-        <div class="mini">Razón: ${escapeHtml(h["RAZÓN RECOMENDACIÓN"] || "-")}</div>
-        <div class="mini">Reposición: ${escapeHtml(h["FECHA REPOSICIÓN"] || "-")} · Contacto: ${escapeHtml(h["FECHA PRÓXIMO CONTACTO"] || "-")}</div>
-        <div class="mini">Obs: ${escapeHtml(h["OBSERVACIONES"] || "-")}</div>
-      </div>
-    `).join("");
+    contenedor.innerHTML = historial.slice(0, 10).map(h => {
+      const alimentoAnterior = String(h["ALIMENTO ANTERIOR"] || "");
+      const alimentoNuevo = String(h["ALIMENTO NUEVO"] || "");
+
+      const hayCambioAlimento =
+        alimentoAnterior.trim() !== "" || alimentoNuevo.trim() !== "";
+
+      const bloqueCambioAlimento = hayCambioAlimento
+        ? `
+          <div class="bloque-cambio-alimento">
+            <div class="bloque-cambio-alimento-titulo">
+              ⚠️ Cambio de alimento registrado
+            </div>
+
+            <div class="mini">
+              <strong>Anterior:</strong> ${escapeHtml(alimentoAnterior || "-")}
+            </div>
+
+            <div class="mini">
+              <strong>Nuevo:</strong> ${escapeHtml(alimentoNuevo || "-")}
+            </div>
+
+            <div class="mini" style="margin-top:6px;">
+              Revisar tolerancia, aceptación, heces, piel y pelaje en el próximo contacto.
+            </div>
+          </div>
+        `
+        : "";
+
+      return `
+        <div class="historial-item">
+          <strong>${formatearFecha(h["FECHA REGISTRO"])}</strong>
+
+          <div class="mini">
+            Tipo: ${escapeHtml(h["TIPO EVENTO"] || "-")}
+          </div>
+
+          <div class="mini">
+            Motivo: ${escapeHtml(h["MOTIVO VISITA"] || "-")} / ${escapeHtml(h["MOTIVO PRINCIPAL"] || "-")}
+          </div>
+
+          <div class="mini">
+            Producto: ${escapeHtml(h["PRODUCTO RECOMENDADO"] || "-")}
+          </div>
+
+          ${bloqueCambioAlimento}
+
+          <div class="mini">
+            Razón: ${escapeHtml(h["RAZÓN RECOMENDACIÓN"] || "-")}
+          </div>
+
+          <div class="mini">
+            Reposición: ${escapeHtml(h["FECHA REPOSICIÓN"] || "-")} · 
+            Contacto: ${escapeHtml(h["FECHA PRÓXIMO CONTACTO"] || "-")}
+          </div>
+
+          <div class="mini">
+            Obs: ${escapeHtml(h["OBSERVACIONES"] || "-")}
+          </div>
+        </div>
+      `;
+    }).join("");
   }
 
   function prepararFormularioAtencionDesdeLocal(m) {
