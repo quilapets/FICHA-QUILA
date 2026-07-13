@@ -467,7 +467,27 @@
 
           <div>
             <label>Sector</label>
-            <input name="sector" placeholder="Ej: Jardín del Este">
+            <select name="sector" id="sector_nueva" required onchange="mostrarSectorOtro()">
+              <option value="">Seleccionar...</option>
+              <option value="Jardín del Este / Barcelona / Emanuel / Toledo / Barrio Universitario">
+                Jardín del Este / Barcelona / Emanuel / Toledo / Barrio Universitario
+              </option>
+              <option value="Quilamapu / Flores Millán / San Alberto Hurtado">
+                Quilamapu / Flores Millán / San Alberto Hurtado
+              </option>
+              <option value="Colonia Bernardo O'Higgins / Camino a Cato">
+                Colonia Bernardo O'Higgins / Camino a Cato
+              </option>
+              <option value="Camino del Agua / Las Coles / Camino a Coihueco">
+                Camino del Agua / Las Coles / Camino a Coihueco
+              </option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div id="campo_sector_otro" class="campo-completo oculto">
+            <label>Especificar otro sector</label>
+            <input id="sector_otro" name="sector_otro" placeholder="Escribir sector">
           </div>
 
           <div>
@@ -477,7 +497,7 @@
 
           <div>
             <label>Especie</label>
-            <select name="especie" required>
+            <select name="especie" id="nueva_especie" required onchange="actualizarEtapasNuevaMascota()">
               <option value="">Seleccionar...</option>
               <option value="Perro">Perro</option>
               <option value="Gato">Gato</option>
@@ -485,9 +505,21 @@
             </select>
           </div>
 
+          <div id="campo_especie_otro" class="campo-completo oculto">
+            <label>¿Qué especie es?</label>
+            <input id="especie_otro" name="especie_otro" placeholder="Ej: Conejo, hámster, hurón, ave, tortuga">
+          </div>
+
           <div>
+            <label>Etapa</label>
+            <select name="etapa" id="nueva_etapa" required onchange="actualizarCamposEdadNuevaMascota()">
+              <option value="">Primero selecciona especie...</option>
+            </select>
+          </div>
+
+          <div id="campo_raza">
             <label>Raza</label>
-            <input name="raza" placeholder="Ej: Mestizo">
+            <input name="raza" id="raza_nueva" placeholder="Ej: Mestizo">
           </div>
 
           <div>
@@ -499,38 +531,33 @@
             </select>
           </div>
 
-          <div>
+          <div id="campo_esterilizado">
             <label>Esterilizado/a</label>
-            <select name="esterilizado">
+            <select name="esterilizado" id="esterilizado_nueva">
               <option value="">Seleccionar...</option>
               <option value="Sí">Sí</option>
               <option value="No">No</option>
             </select>
           </div>
 
-          <div>
-            <label>Etapa</label>
-            <input name="etapa" placeholder="Ej: Adulto">
-          </div>
-
-          <div>
+          <div id="campo_peso_actual">
             <label>Peso actual kg</label>
-            <input name="peso_actual_kg" type="number" step="0.1">
+            <input name="peso_actual_kg" id="peso_actual_kg" type="number" step="0.1" placeholder="Ej: 6">
           </div>
 
-          <div>
+          <div id="campo_edad_meses" class="oculto">
             <label>Edad meses</label>
-            <input name="edad_meses" type="number">
+            <input name="edad_meses" id="edad_meses" type="number" placeholder="Ej: 5">
           </div>
 
-          <div>
+          <div id="campo_peso_adulto_estimado" class="oculto">
             <label>Peso adulto estimado kg</label>
-            <input name="peso_adulto_estimado_kg" type="number" step="0.1">
+            <input name="peso_adulto_estimado_kg" id="peso_adulto_estimado_kg" type="number" step="0.1" placeholder="Ej: 15">
           </div>
 
-          <div>
+          <div id="campo_edad_anios" class="oculto">
             <label>Edad años</label>
-            <input name="edad_anios" type="number">
+            <input name="edad_anios" id="edad_anios" type="number" placeholder="Ej: 4">
           </div>
 
           <div class="campo-completo">
@@ -586,7 +613,11 @@
 
   document.getElementById("fecha_compra").valueAsDate = new Date();
 
-  window.addEventListener("load", cargarBaseMascotas);
+  window.addEventListener("load", () => {
+    cargarBaseMascotas();
+    actualizarEtapasNuevaMascota();
+    actualizarCamposEdadNuevaMascota();
+  });
 
   function normalizar(texto) {
     return String(texto || "")
@@ -956,6 +987,152 @@
     }
   }
 
+  function mostrarSectorOtro() {
+    const sector = document.getElementById("sector_nueva");
+    const campoOtro = document.getElementById("campo_sector_otro");
+    const inputOtro = document.getElementById("sector_otro");
+
+    if (sector.value === "Otro") {
+      campoOtro.classList.remove("oculto");
+      inputOtro.required = true;
+    } else {
+      campoOtro.classList.add("oculto");
+      inputOtro.required = false;
+      inputOtro.value = "";
+    }
+  }
+
+  function mostrarEspecieOtro() {
+    const especie = document.getElementById("nueva_especie");
+    const campoOtro = document.getElementById("campo_especie_otro");
+    const inputOtro = document.getElementById("especie_otro");
+
+    const campoRaza = document.getElementById("campo_raza");
+    const inputRaza = document.getElementById("raza_nueva");
+
+    const campoEsterilizado = document.getElementById("campo_esterilizado");
+    const selectEsterilizado = document.getElementById("esterilizado_nueva");
+
+    if (especie.value === "Otro") {
+      campoOtro.classList.remove("oculto");
+      inputOtro.required = true;
+
+      campoRaza.classList.add("oculto");
+      inputRaza.value = "";
+
+      campoEsterilizado.classList.add("oculto");
+      selectEsterilizado.value = "";
+
+    } else {
+      campoOtro.classList.add("oculto");
+      inputOtro.required = false;
+      inputOtro.value = "";
+
+      campoRaza.classList.remove("oculto");
+      campoEsterilizado.classList.remove("oculto");
+    }
+  }
+
+  function actualizarEtapasNuevaMascota() {
+    const especie = document.getElementById("nueva_especie").value;
+    const etapa = document.getElementById("nueva_etapa");
+
+    mostrarEspecieOtro();
+
+    etapa.innerHTML = "";
+
+    if (!especie) {
+      etapa.innerHTML = `<option value="">Primero selecciona especie...</option>`;
+      actualizarCamposEdadNuevaMascota();
+      return;
+    }
+
+    if (especie === "Perro") {
+      etapa.innerHTML = `
+        <option value="">Seleccionar...</option>
+        <option value="Cachorro">Cachorro</option>
+        <option value="Adulto">Adulto</option>
+        <option value="Senior">Senior</option>
+      `;
+    }
+
+    if (especie === "Gato") {
+      etapa.innerHTML = `
+        <option value="">Seleccionar...</option>
+        <option value="Gatito">Gatito</option>
+        <option value="Adulto">Adulto</option>
+        <option value="Senior">Senior</option>
+      `;
+    }
+
+    if (especie === "Otro") {
+      etapa.innerHTML = `
+        <option value="">Seleccionar...</option>
+        <option value="Cría">Cría</option>
+        <option value="Adulto">Adulto</option>
+        <option value="Senior">Senior</option>
+      `;
+    }
+
+    actualizarCamposEdadNuevaMascota();
+  }
+
+  function actualizarCamposEdadNuevaMascota() {
+    const especie = document.getElementById("nueva_especie").value;
+    const etapa = document.getElementById("nueva_etapa").value;
+
+    const campoPeso = document.getElementById("campo_peso_actual");
+    const campoMeses = document.getElementById("campo_edad_meses");
+    const campoPesoAdulto = document.getElementById("campo_peso_adulto_estimado");
+    const campoAnios = document.getElementById("campo_edad_anios");
+
+    const peso = document.getElementById("peso_actual_kg");
+    const meses = document.getElementById("edad_meses");
+    const pesoAdulto = document.getElementById("peso_adulto_estimado_kg");
+    const anios = document.getElementById("edad_anios");
+
+    campoPeso.classList.remove("oculto");
+    campoMeses.classList.add("oculto");
+    campoPesoAdulto.classList.add("oculto");
+    campoAnios.classList.add("oculto");
+
+    meses.value = "";
+    pesoAdulto.value = "";
+    anios.value = "";
+
+    meses.required = false;
+    pesoAdulto.required = false;
+    anios.required = false;
+    peso.required = false;
+
+    if (!especie || !etapa) return;
+
+    peso.required = true;
+
+    if (especie === "Perro" && etapa === "Cachorro") {
+      campoMeses.classList.remove("oculto");
+      campoPesoAdulto.classList.remove("oculto");
+      meses.required = true;
+      pesoAdulto.required = true;
+      return;
+    }
+
+    if (especie === "Gato" && etapa === "Gatito") {
+      campoMeses.classList.remove("oculto");
+      meses.required = true;
+      return;
+    }
+
+    if (especie === "Otro" && etapa === "Cría") {
+      campoMeses.classList.remove("oculto");
+      meses.required = true;
+      return;
+    }
+
+    campoAnios.classList.remove("oculto");
+    anios.required = true;
+  }
+
   document.getElementById("formAtencion").addEventListener("submit", async function(e) {
     e.preventDefault();
 
@@ -1009,6 +1186,17 @@
     const formData = new FormData(this);
     const datos = Object.fromEntries(formData.entries());
 
+    if (datos.sector === "Otro") {
+      datos.sector = datos.sector_otro || "Otro";
+    }
+
+    if (datos.especie === "Otro") {
+      datos.especie = datos.especie_otro || "Otro";
+    }
+
+    delete datos.sector_otro;
+    delete datos.especie_otro;
+
     datos.action = "crearMascota";
 
     try {
@@ -1023,6 +1211,10 @@
       mostrarMensaje("Mascota creada correctamente.");
 
       this.reset();
+      mostrarSectorOtro();
+      mostrarEspecieOtro();
+      actualizarEtapasNuevaMascota();
+      actualizarCamposEdadNuevaMascota();
 
       setTimeout(async () => {
         await cargarBaseMascotas();
